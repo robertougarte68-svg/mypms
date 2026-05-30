@@ -1,0 +1,115 @@
+//este dashboard intenta con grid.builder y provider
+
+import 'package:flutter/material.dart';
+import 'package:my_pms/presentation/providers/rooms_provider.dart';
+import 'package:my_pms/presentation/screens/homepage.dart';
+import 'package:provider/provider.dart';
+
+class MyDashboard extends StatefulWidget {
+  MyDashboard({super.key});
+
+  @override
+  State<MyDashboard> createState() => _MyDashboardState();
+}
+
+class _MyDashboardState extends State<MyDashboard> {
+  //PROPERITIES
+  List<Widget> roomst = [];
+  //properities of rooms
+  List<dynamic> atributos = [];
+  List<Color> roomcolors = [];
+
+  //METOD
+  Widget room(int index) {
+    //usa set state
+    //this widget creates a box that represents a room
+    return Container(
+      margin: EdgeInsets.all(10),
+      child: PopupMenuButton<String>(
+        color: const Color.fromARGB(255, 130, 130, 130),
+        onSelected: (value) {
+          setState(() {
+            if (int.parse(value) == 1) {
+              print('$value');
+              roomcolors[index] = Colors.blue;
+            } else if (int.parse(value) == 2) {
+              print('$value');
+              roomcolors[index] = Colors.red;
+            }
+          });
+        },
+        itemBuilder: (context) => <PopupMenuEntry<String>>[
+          const PopupMenuItem<String>(value: '1', child: Text('color 1')),
+          const PopupMenuItem<String>(value: '2', child: Text('color 2')),
+          const PopupMenuItem<String>(value: '3', child: Text('color 3')),
+        ],
+
+        child: Container(
+          //key: ValueKey(index),
+          padding: EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            boxShadow: [BoxShadow(color: Colors.black, blurRadius: 10)],
+            color: roomcolors[index],
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                atributos[index].number.toString(),
+                style: TextStyle(fontSize: 10, color: Colors.black),
+              ),
+              Text(
+                atributos[index].descripcion,
+                style: TextStyle(fontSize: 10, color: Colors.black),
+              ),
+              Text(
+                atributos[index].precio.toString(),
+                style: TextStyle(fontSize: 10, color: Colors.black),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  //METOD
+  @override
+  Widget build(BuildContext context) {
+    // final roomsProvider = context.watch<RoomsProvider>();
+    setState(() {});
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Rooms State:',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ),
+      body: Container(
+        //contiene el gridview
+        margin: EdgeInsets.all(20),
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+          ),
+          itemCount: atributos.length,
+          itemBuilder: (BuildContext context, int index) {
+            return room(index);
+          },
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          atributos.add(await Navigator.pushNamed(context, "/newroom"));
+          roomcolors.add(Colors.lightGreen);
+          // roomst = List.from(roomst)..add(room(roomcolors.length - 1));
+          setState(() {});
+        },
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+
+  // Future<void> _launchNewRoomPage(BuildContext context) async {}
+}

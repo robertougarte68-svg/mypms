@@ -1,0 +1,5 @@
+//HACER UNA PUBLICACION EN MOSQUITO
+mosquitto_pub -h localhost -t hotel/room/101/status -m "{""device_id"":""esp32_101"",""data"":{""status"":""occupied""}}"
+
+//ESCUCHAR UN TOPIC
+mosquitto_sub -h localhost -t hotel/room/# -v

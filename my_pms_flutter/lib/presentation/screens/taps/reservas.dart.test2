@@ -1,0 +1,238 @@
+import 'package:flutter/material.dart';
+import 'package:my_pms/providers/hotel_provider.dart';
+import 'package:provider/provider.dart';
+
+class Reservas extends StatelessWidget {
+  const Reservas({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final hotelProv = context.watch<HotelProvider>();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Reservas"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_alt),
+            onPressed: () => _showFilters(context),
+          ),
+        ],
+      ),
+
+      body: Column(
+        children: [
+          _FiltersBar(),
+          const SizedBox(height: 8),
+
+          Expanded(
+            child: ListView.builder(
+              itemCount: hotelProv.filteredReservations.length,
+              itemBuilder: (context, index) {
+                final r = hotelProv.filteredReservations[index];
+                return ReservationCard(reservation: r);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFilters(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => const FiltersSheet(),
+    );
+  }
+}
+
+class _FiltersBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<ReservationsProvider>();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          _chip(context, "Todos", null),
+          _chip(context, "Pendientes", "pending"),
+          _chip(context, "Confirmadas", "confirmed"),
+          _chip(context, "Check-in", "checkin"),
+          _chip(context, "Check-out", "checkout"),
+          _chip(context, "No-show", "no_show"),
+          _chip(context, "Canceladas", "cancelled"),
+
+          const SizedBox(width: 10),
+
+          OutlinedButton.icon(
+            icon: const Icon(Icons.date_range),
+            label: const Text("Rango"),
+            onPressed: () async {
+              final range = await showDateRangePicker(
+                context: context,
+                firstDate: DateTime(2020),
+                lastDate: DateTime(2030),
+              );
+
+              if (range != null) {
+                provider.setDateRange(range);
+              }
+            },
+          ),
+
+          const SizedBox(width: 10),
+
+          DropdownButton<String>(
+            value: provider.sortMode,
+            items: const [
+              DropdownMenuItem(value: "recent", child: Text("Recientes")),
+              DropdownMenuItem(value: "old", child: Text("Antiguos")),
+              DropdownMenuItem(value: "state", child: Text("Estado")),
+            ],
+            onChanged: (v) {
+              if (v != null) provider.setSortMode(v);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _chip(BuildContext context, String label, String? state) {
+    final provider = context.watch<ReservationsProvider>();
+    final selected = provider.stateFilter == state;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => provider.setStateFilter(state),
+      ),
+    );
+  }
+}
+
+class ReservationCard extends StatelessWidget {
+  final Reservation reservation;
+
+  const ReservationCard({super.key, required this.reservation});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _stateColor(reservation.state);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: color.withOpacity(0.2),
+          child: Text(reservation.id.toString()),
+        ),
+
+        title: Text(reservation.clientName),
+        subtitle: Text(
+          "Hab: ${reservation.room} • ${reservation.checkIn} - ${reservation.checkOut}",
+        ),
+
+        trailing: _stateBadge(reservation.state),
+
+        onTap: reservation.state == "pending"
+            ? () => _openPendingDialog(context, reservation)
+            : null,
+      ),
+    );
+  }
+
+  Widget _stateBadge(String state) {
+    final color = _stateColor(state);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        state.toUpperCase(),
+        style: TextStyle(color: color, fontSize: 12),
+      ),
+    );
+  }
+
+  Color _stateColor(String state) {
+    switch (state) {
+      case "pending":
+        return Colors.orange;
+      case "confirmed":
+        return Colors.green;
+      case "checkin":
+        return Colors.blue;
+      case "checkout":
+        return Colors.purple;
+      case "no_show":
+        return Colors.grey;
+      case "cancelled":
+        return Colors.red;
+      default:
+        return Colors.black;
+    }
+  }
+
+  void _openPendingDialog(BuildContext context, Reservation r) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Reserva ${r.id}", style: const TextStyle(fontSize: 18)),
+
+              const SizedBox(height: 10),
+
+              Text("Cliente: ${r.clientName}"),
+              Text("Habitación: ${r.room}"),
+              Text("Fechas: ${r.checkIn} - ${r.checkOut}"),
+              Text("Total: ${r.total} Bs"),
+
+              const SizedBox(height: 20),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    onPressed: () {
+                      context.read<ReservationsProvider>().reject(r.id);
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Rechazar"),
+                  ),
+
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    onPressed: () {
+                      context.read<ReservationsProvider>().confirm(r.id);
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Confirmar"),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "my_pms_backend",
+  "version": "1.0.0",
+  "description": "servidor backend",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "Roberto Ugarte",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mqtt": "^5.15.1",
+    "multer": "^2.1.1",
+    "mysql2": "^3.17.2",
+    "node-cron": "^4.2.1",
+    "qrcode": "^1.5.4",
+    "uuid": "^14.0.0",
+    "ws": "^8.20.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}

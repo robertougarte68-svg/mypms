@@ -1,0 +1,16 @@
+OCI = Oracle Cloud Infraestructure (El servicio de hosting de oracle)
+VCN = Virtual Cloud Networks (Modulo de Red)
+NSG = Network Security Groups
+
+
+oci compute instance-console-connection create --instance-id ocid1.instance.oc1.sa-saopaulo-1.antxeljr7rx4edyci67gpirav2szcn3s3k2vjcyg4abviv2a5i2quudxbfcq --public-key-file ~/.ssh/id_rsa.pub
+
+sudo iptables -P INPUT ACCEPT		
+sudo iptables -P FORWARD ACCEPT	
+sudo iptables -P OUTPUT ACCEPT	
+sudo iptables -F				
+sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+sudo iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+sudo iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+sudo iptables -P INPUT DROP
+sudo iptables -P FORWARD DROP

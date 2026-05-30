@@ -1,0 +1,10 @@
+SELECT 
+	r.id AS id_rol,
+    r.rol AS rol,
+p.id AS id_permiso,
+    p.permiso AS permiso
+FROM roles r
+INNER JOIN rol_permiso rp 
+    ON r.id = rp.id_rol
+INNER JOIN permisos p 
+    ON rp.id_permiso = p.id;

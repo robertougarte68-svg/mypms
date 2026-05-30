@@ -1,0 +1,1 @@
+-la ventana login no hace nada si el servidor no esta corriendo
