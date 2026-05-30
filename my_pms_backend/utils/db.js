@@ -3,8 +3,8 @@ const mysqlPromise = require("mysql2/promise");
 
 const db = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "root",
+  user: "oci_server",
+  password: "server_pass",
   database: "mypms",
   port: 3306,
   dateStrings: true,
@@ -12,8 +12,8 @@ const db = mysql.createConnection({
 
 const dbPromise = mysqlPromise.createPool({
   host: "localhost",
-  user: "root",
-  password: "root",
+  user: "oci_server",
+  password: "server_pass",
   database: "mypms",
   port: 3306,
   waitForConnections: true,
